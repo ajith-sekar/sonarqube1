@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sonarqube-data-pv
+spec:
+  capacity:
+    storage: {{ .Values.sonarqube.storage.data }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/sonarqube-data
+  persistentVolumeReclaimPolicy: Retain
+

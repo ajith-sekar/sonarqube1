@@ -1,0 +1,22 @@
+sonarqube:
+  image: sonarqube:10.4.0
+  port: 9000
+  type: LoadBalancer
+  storage:
+    data: 10Gi
+    extensions: 2Gi
+    logs: 1Gi
+
+postgres:
+  image: postgres:15
+  user: sonar
+  password: sonarpass
+  database: sonarqube
+  port: 5432
+  storage: 5Gi
+
+ingress:
+  enabled: true
+  hostname: sonarqube.local
+  className: nginx
+

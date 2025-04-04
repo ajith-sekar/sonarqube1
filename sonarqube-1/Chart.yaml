@@ -1,0 +1,7 @@
+apiVersion: v2
+name: sonarqube
+description: SonarQube with PostgreSQL backend storage
+type: application
+version: 0.1.0
+appVersion: "10.4.0"
+
