@@ -7,4 +7,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.sonarqube.storage.logs }}
+      storage: 1Gi
+  storageClassName: manual
