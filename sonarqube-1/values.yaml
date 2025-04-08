@@ -1,7 +1,7 @@
 sonarqube:
   image:
     repository: sonarqube
-    tag: 10.4.0
+    tag: 10.3.0-community
   port: 9000
   storage:
     data: 10Gi
@@ -20,4 +20,3 @@ ingress:
   enabled: true
   hostname: sonarqube.local
   className: nginx
-
