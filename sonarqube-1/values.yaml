@@ -4,7 +4,7 @@ sonarqube:
     tag: 10.3.0-community
   port: 9000
   storage:
-    data: 10Gi
+    data: 20Gi
     extensions: 2Gi
     logs: 1Gi
 
