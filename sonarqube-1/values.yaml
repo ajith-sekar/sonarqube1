@@ -1,7 +1,8 @@
 sonarqube:
-  image: sonarqube:10.4.0
+  image:
+    repository: sonarqube
+    tag: 10.3.0-community
   port: 9000
-  type: LoadBalancer
   storage:
     data: 10Gi
     extensions: 2Gi
