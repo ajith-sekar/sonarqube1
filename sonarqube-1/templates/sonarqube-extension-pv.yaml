@@ -4,7 +4,7 @@ metadata:
   name: sonarqube-extensions-pv
 spec:
   capacity:
-    storage: {{ .Values.sonarqube.storage.extensions }}
+    storage: 2Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
