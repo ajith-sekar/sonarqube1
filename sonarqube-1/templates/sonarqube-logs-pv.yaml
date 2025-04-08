@@ -9,7 +9,7 @@ metadata:
     meta.helm.sh/release-namespace: sonarqube
 spec:
   capacity:
-    storage: {{ .Values.sonarqube.storage.logs }}
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
