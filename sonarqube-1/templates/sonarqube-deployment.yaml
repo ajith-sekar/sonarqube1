@@ -12,18 +12,24 @@ spec:
       labels:
         app: sonarqube
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: sonarqube
-          image: {{ .Values.sonarqube.image.repository }}:{{ .Values.sonarqube.image.tag }}
+          image: sonarqube:10.4.1
           ports:
-            - containerPort: {{ .Values.sonarqube.port }}
+            - containerPort: 9000
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
           env:
             - name: SONAR_JDBC_URL
-              value: jdbc:postgresql://postgres:5432/{{ .Values.postgres.database }}
+              value: jdbc:postgresql://postgres:5432/sonarqube
             - name: SONAR_JDBC_USERNAME
-              value: "{{ .Values.postgres.user }}"
+              value: sonar
             - name: SONAR_JDBC_PASSWORD
-              value: "{{ .Values.postgres.password }}"
+              value: sonarpass
           volumeMounts:
             - name: data
               mountPath: /opt/sonarqube/data
