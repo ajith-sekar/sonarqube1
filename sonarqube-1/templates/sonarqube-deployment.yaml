@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonarqube
+  namespace: sonarqube
 spec:
   replicas: 1
   selector:
@@ -25,7 +26,7 @@ spec:
             allowPrivilegeEscalation: false
           env:
             - name: SONAR_JDBC_URL
-              value: jdbc:postgresql://postgres:5432/sonarqube
+              value: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
             - name: SONAR_JDBC_USERNAME
               value: sonar
             - name: SONAR_JDBC_PASSWORD
