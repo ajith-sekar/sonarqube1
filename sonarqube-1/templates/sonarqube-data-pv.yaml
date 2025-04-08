@@ -4,7 +4,7 @@ metadata:
   name: sonarqube-data-pv
 spec:
   capacity:
-    storage: {{ .Values.sonarqube.storage.data }}
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
