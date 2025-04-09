@@ -1,7 +1,7 @@
 sonarqube:
   image:
     repository: sonarqube
-    tag: 9.9.4
+    tag: 9.9.4-community
   port: 9000
   storage:
     data: 20Gi
