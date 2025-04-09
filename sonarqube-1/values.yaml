@@ -7,6 +7,9 @@ sonarqube:
     data: 20Gi
     extensions: 2Gi
     logs: 1Gi
+  securityContext:
+    fsGroup: 1000
+    runAsUser: 1000
 
 postgres:
   image: postgres:15
