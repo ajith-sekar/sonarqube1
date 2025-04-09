@@ -12,6 +12,11 @@ sonarqube:
     runAsUser: 1000
     runAsGroup: 1000
 
+service:
+  type: LoadBalancer
+  annotations: 
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+
 postgres:
   image: postgres:15
   user: sonar
