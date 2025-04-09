@@ -13,7 +13,7 @@ spec:
         app: sonarqube
     spec:
       securityContext:
-        fsGroup: 1000
+        fsGroup: 1000  
       containers:
         - name: sonarqube
           image: sonarqube:9.9.4-community
@@ -31,19 +31,19 @@ spec:
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
           volumeMounts:
-            - name: data
+            - name: sonarqube-data
               mountPath: /opt/sonarqube/data
-            - name: extensions
+            - name: sonarqube-extensions
               mountPath: /opt/sonarqube/extensions
-            - name: logs
+            - name: sonarqube-logs
               mountPath: /opt/sonarqube/logs
       volumes:
-        - name: data
+        - name: sonarqube-data
           persistentVolumeClaim:
             claimName: sonarqube-data-pvc
-        - name: extensions
+        - name: sonarqube-extensions
           persistentVolumeClaim:
             claimName: sonarqube-extensions-pvc
-        - name: logs
+        - name: sonarqube-logs
           persistentVolumeClaim:
             claimName: sonarqube-logs-pvc
