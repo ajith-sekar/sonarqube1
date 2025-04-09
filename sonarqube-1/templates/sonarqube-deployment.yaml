@@ -16,7 +16,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: sonarqube
-          image: sonarqube:9.9.4
+          image: sonarqube:9.9.4-community
           ports:
             - containerPort: 9000
           securityContext:
