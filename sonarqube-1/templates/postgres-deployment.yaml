@@ -15,49 +15,48 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 999  # Match the postgres UID (ensure the permissions are correct)
+        fsGroup: 999  # Match the postgres UID
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: postgres
-          image: "postgres:15"  # Make sure this version is compatible
+          image: "postgres:15"
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
           securityContext:
-            allowPrivilegeEscalation: false  # Minimize privilege escalation
-            runAsNonRoot: false  # Ensure non-root user
-            runAsUser: 999  # Default PostgreSQL user
-            readOnlyRootFilesystem: true  # Read-only root filesystem
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true  # <- this should be true
+            runAsUser: 999
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
-                - ALL  # Drop unnecessary capabilities
+                - ALL
           resources:
             limits:
               cpu: "500m"
               memory: "512Mi"
             requests:
-              cpu: "250m"  # Requests for CPU
-              memory: "256Mi"  # Requests for memory
+              cpu: "250m"
+              memory: "256Mi"
           env:
             - name: POSTGRES_USER
-              value: "sonar"  # Replace with actual user
+              value: "sonar"
             - name: POSTGRES_PASSWORD
-              value: "sonarpass"  # Replace with actual password
+              value: "sonarpass"
             - name: POSTGRES_DB
-              value: "sonarqube"  # Replace with actual database name
+              value: "sonarqube"
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
             - name: postgresql-run
               mountPath: /var/run/postgresql
-
           livenessProbe:
             exec:
-              command: 
+              command:
                 - pg_isready
                 - -U
-                - "sonar"  # Use the correct postgres user
+                - "sonar"
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -67,20 +66,20 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - "sonar"  # Use the correct postgres user
+                - "sonar"
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3 
-       volumes:
+            failureThreshold: 3
+      volumes:  # <- moved this outside containers
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: postgres-pvc
         - name: postgresql-run
           emptyDir: {}
 
-
 ---
+
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
