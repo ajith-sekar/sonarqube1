@@ -22,25 +22,25 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgres
-          image: "{{ .Values.postgres.image }}@{{ .Values.postgres.imageDigest }}"
+          image: "{{ .Values.postgres.image }}@{{ .Values.postgres.imageDigest }}"  # Ensuring Image Digest is used
           imagePullPolicy: Always
           ports:
             - containerPort: {{ .Values.postgres.port }}
           securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
+            allowPrivilegeEscalation: false  # Minimize privilege escalation
+            runAsNonRoot: true  # Ensure non-root user
             runAsUser: 1000
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: true  # Read-only root filesystem
             capabilities:
               drop:
-                - ALL
+                - ALL  # Drop unnecessary capabilities
           resources:
             limits:
               cpu: "500m"
               memory: "512Mi"
             requests:
-              cpu: "250m"
-              memory: "256Mi"
+              cpu: "250m"  # Requests for CPU
+              memory: "256Mi"  # Requests for memory
           env:
             - name: POSTGRES_USER
               value: "{{ .Values.postgres.user }}"
@@ -53,14 +53,20 @@ spec:
               mountPath: /var/lib/postgresql/data
           livenessProbe:
             exec:
-              command: ["pg_isready", "-U", "{{ .Values.postgres.user }}"]
+              command: 
+                - pg_isready
+                - -U
+                - "{{ .Values.postgres.user }}"
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "{{ .Values.postgres.user }}"]
+              command:
+                - pg_isready
+                - -U
+                - "{{ .Values.postgres.user }}"
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
@@ -69,3 +75,20 @@ spec:
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: postgres-pvc
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-allow-sonarqube
+  namespace: sonarqube
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: sonarqube
