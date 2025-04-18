@@ -49,6 +49,9 @@ spec:
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
+            - name: postgresql-run
+              mountPath: /var/run/postgresql
+
           livenessProbe:
             exec:
               command: 
@@ -68,11 +71,14 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3
-      volumes:
+            failureThreshold: 3 
+       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: postgres-pvc
+        - name: postgresql-run
+          emptyDir: {}
+
 
 ---
 apiVersion: networking.k8s.io/v1
