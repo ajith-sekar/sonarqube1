@@ -26,7 +26,7 @@ spec:
             - containerPort: 5432
           securityContext:
             allowPrivilegeEscalation: false  # Minimize privilege escalation
-            runAsNonRoot: true  # Ensure non-root user
+            runAsNonRoot: false  # Ensure non-root user
             runAsUser: 999  # Default PostgreSQL user
             readOnlyRootFilesystem: true  # Read-only root filesystem
             capabilities:
