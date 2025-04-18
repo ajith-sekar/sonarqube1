@@ -36,7 +36,7 @@ spec:
               mountPath: /opt/sonarqube/logs
       containers:
         - name: sonarqube
-          image: sonarqube:9.9.4-community@sha256:<replace_with_actual_digest>
+          image: sonarqube:9.9.4-community
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
