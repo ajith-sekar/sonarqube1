@@ -36,7 +36,7 @@ spec:
               mountPath: /opt/sonarqube/logs
       containers:
         - name: sonarqube
-          image: "{{ .Values.sonarqube.image }}:{{ .Values.sonarqube.image.tag }}"
+          image: "sonarqube:9.9.4-community"
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
@@ -96,19 +96,3 @@ spec:
         - name: sonarqube-logs
           persistentVolumeClaim:
             claimName: sonarqube-logs-pvc
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: sonarqube-allow-ingress
-  namespace: sonarqube
-spec:
-  podSelector:
-    matchLabels:
-      app: sonarqube
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - namespaceSelector: {}
