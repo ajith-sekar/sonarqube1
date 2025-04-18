@@ -24,7 +24,7 @@ spec:
           command:
             - sh
             - -c
-            - chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs
+            - chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp
           securityContext:
             runAsUser: 0
           volumeMounts:
@@ -34,9 +34,11 @@ spec:
               mountPath: /opt/sonarqube/extensions
             - name: sonarqube-logs
               mountPath: /opt/sonarqube/logs
+            - name: sonarqube-temp
+              mountPath: /opt/sonarqube/temp
       containers:
         - name: sonarqube
-          image: "sonarqube:9.9.4-community"
+          image: "sonarqube:9.9.4-community"  # Replace with the correct image
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
@@ -52,7 +54,7 @@ spec:
             runAsGroup: 1000
             runAsNonRoot: true
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false  # Allow write access to the filesystem
             capabilities:
               drop:
                 - ALL
@@ -86,6 +88,8 @@ spec:
               mountPath: /opt/sonarqube/extensions
             - name: sonarqube-logs
               mountPath: /opt/sonarqube/logs
+            - name: sonarqube-temp
+              mountPath: /opt/sonarqube/temp
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
@@ -96,3 +100,20 @@ spec:
         - name: sonarqube-logs
           persistentVolumeClaim:
             claimName: sonarqube-logs-pvc
+        - name: sonarqube-temp
+          emptyDir: {}  # Use emptyDir for temp storage that will be erased on pod deletion
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sonarqube-allow-ingress
+  namespace: sonarqube
+spec:
+  podSelector:
+    matchLabels:
+      app: sonarqube
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
