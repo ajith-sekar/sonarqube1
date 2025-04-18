@@ -15,12 +15,12 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 1000  # This should typically be set to match the `postgres` user
+        fsGroup: 999  # Match the postgres UID (ensure the permissions are correct)
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: postgres
-          image: "postgres:15"  # Use a specific version here
+          image: "postgres:15"  # Make sure this version is compatible
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
