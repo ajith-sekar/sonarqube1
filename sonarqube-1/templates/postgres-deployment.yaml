@@ -15,21 +15,19 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 3000
-        fsGroup: 2000
+        fsGroup: 1000  # This should typically be set to match the `postgres` user
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: postgres
-          image: "{{ .Values.postgres.image }}"
+          image: "postgres:15"  # Use a specific version here
           imagePullPolicy: Always
           ports:
-            - containerPort: {{ .Values.postgres.port }}
+            - containerPort: 5432
           securityContext:
             allowPrivilegeEscalation: false  # Minimize privilege escalation
             runAsNonRoot: true  # Ensure non-root user
-            runAsUser: 1000
+            runAsUser: 999  # Default PostgreSQL user
             readOnlyRootFilesystem: true  # Read-only root filesystem
             capabilities:
               drop:
@@ -43,11 +41,11 @@ spec:
               memory: "256Mi"  # Requests for memory
           env:
             - name: POSTGRES_USER
-              value: "{{ .Values.postgres.user }}"
+              value: "sonar"  # Replace with actual user
             - name: POSTGRES_PASSWORD
-              value: "{{ .Values.postgres.password }}"
+              value: "sonarpass"  # Replace with actual password
             - name: POSTGRES_DB
-              value: "{{ .Values.postgres.database }}"
+              value: "sonarqube"  # Replace with actual database name
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
@@ -56,7 +54,7 @@ spec:
               command: 
                 - pg_isready
                 - -U
-                - "{{ .Values.postgres.user }}"
+                - "sonar"  # Use the correct postgres user
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -66,7 +64,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - "{{ .Values.postgres.user }}"
+                - "sonar"  # Use the correct postgres user
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
@@ -75,6 +73,7 @@ spec:
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: postgres-pvc
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
