@@ -2,14 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: sonarqube
+  namespace: sonarqube
   annotations:
-    {{- with .Values.service.annotations }}
-    {{ toYaml . | indent 4 }}
-    {{- end }}
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
 spec:
-  type: {{ .Values.service.type }}
+  type: LoadBalancer
   selector:
     app: sonarqube
   ports:
-    - port: {{ .Values.sonarqube.port }}
-      targetPort: {{ .Values.sonarqube.port }}
+    - port: 9000
+      targetPort: 9000
