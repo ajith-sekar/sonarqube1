@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonarqube
+  namespace: sonarqube
 spec:
   replicas: 1
   selector:
@@ -14,15 +15,18 @@ spec:
     spec:
       securityContext:
         fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      automountServiceAccountToken: false
       initContainers:
         - name: fix-permissions
-          image: busybox
+          image: busybox:1.35
           command:
-            [
-              "sh",
-              "-c",
-              "chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs"
-            ]
+            - sh
+            - -c
+            - chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs
+          securityContext:
+            runAsUser: 0
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
@@ -32,13 +36,10 @@ spec:
               mountPath: /opt/sonarqube/logs
       containers:
         - name: sonarqube
-          image: sonarqube:9.9.4-community
+          image: sonarqube:9.9.4-community@sha256:<replace_with_actual_digest>
+          imagePullPolicy: Always
           ports:
             - containerPort: 9000
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            allowPrivilegeEscalation: false
           env:
             - name: SONAR_JDBC_URL
               value: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
@@ -46,6 +47,36 @@ spec:
               value: sonar
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /about
+              port: 9000
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /about
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
