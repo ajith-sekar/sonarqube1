@@ -20,7 +20,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: sonarqube
-          image: sonarqube@sha256:fd11b3a22cb9a8d0b0cd1851a355a2c8fd6f87f5029893843c62770c1e930f32
+          image: sonarqube:9.9.4-community
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
