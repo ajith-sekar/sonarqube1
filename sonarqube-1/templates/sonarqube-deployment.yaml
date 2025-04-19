@@ -24,11 +24,13 @@ spec:
           command:
             - sh
             - -c
-            - chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp
+            - |
+              echo "Fixing permissions..." && \
+              chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp
           securityContext:
             runAsUser: 0
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false  # ← MUST be false so chown can run
             capabilities:
               drop: [ALL]
           volumeMounts:
