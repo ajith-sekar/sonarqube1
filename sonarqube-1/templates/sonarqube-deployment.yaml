@@ -15,12 +15,12 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 1000
+        fsGroup: 1001  # Updated to a higher UID
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: sonarqube
-          image: sonarqube:9.9.4-community
+          image: sonarqube:9.9.4-community # Replace with the image digest
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
@@ -32,8 +32,8 @@ spec:
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
           securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
+            runAsUser: 1001  # Updated to a higher UID
+            runAsGroup: 1001  # Updated to a higher group
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
