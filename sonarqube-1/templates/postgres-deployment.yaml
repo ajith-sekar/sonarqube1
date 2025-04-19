@@ -20,7 +20,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgres
-          image: "postgres@sha256:86ebd1c20422a17f840a607b7e93adff46f4b65a6b96c1c86048982a3ed3e4e6"
+          image: "postgres:15.3"
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
