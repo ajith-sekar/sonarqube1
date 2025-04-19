@@ -15,12 +15,12 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 1001  # Updated to a higher UID
+        fsGroup: 1001
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: sonarqube
-          image: sonarqube:9.9.4-community # Replace with the image digest
+          image: sonarqube:9.9.4-community # Consider replacing with a specific image digest for immutability
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
@@ -32,13 +32,14 @@ spec:
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
           securityContext:
-            runAsUser: 1001  # Updated to a higher UID
-            runAsGroup: 1001  # Updated to a higher group
+            runAsUser: 1001
+            runAsGroup: 1001
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
-              drop: [ALL]
+              drop:
+                - ALL
           resources:
             requests:
               cpu: "500m"
@@ -83,6 +84,7 @@ spec:
             claimName: sonarqube-logs-pvc
         - name: sonarqube-temp
           emptyDir: {}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -97,4 +99,4 @@ spec:
     - Ingress
   ingress:
     - from:
-        - namespaceSelector: {}
+        - podSelector: {}  # Allow all pods in the same namespace to connect
