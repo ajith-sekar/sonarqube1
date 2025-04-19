@@ -2,7 +2,6 @@ sonarqube:
   image:
     repository: sonarqube
     tag: 9.9.4-community
-    pullPolicy: IfNotPresent
   port: 9000
   storage:
     data: 20Gi
