@@ -42,7 +42,7 @@ spec:
               mountPath: /opt/sonarqube/temp
       containers:
         - name: sonarqube
-          image: sonarqube@sha256:285e7d87b936a2b8d9732c62cf594309498013e59dc98e7470d28d30149ffb8a  # corresponds to 9.9.4-community
+          image: sonarqube:9.9.4-community
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
