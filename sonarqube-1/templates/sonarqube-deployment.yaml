@@ -1,47 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "sonarqube.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "sonarqube.labels" . | nindent 4 }}
+  name: sonarqube
+  namespace: sonarqube
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "sonarqube.name" . }}
+      app: sonarqube
   template:
     metadata:
       labels:
-        app: {{ include "sonarqube.name" . }}
+        app: sonarqube
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 1001
+        fsGroup: 1001  # Updated to a higher UID
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: sonarqube
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: sonarqube:9.9.4-community # Replace with the image digest
+          imagePullPolicy: Always
           ports:
             - containerPort: 9000
           env:
             - name: SONAR_JDBC_URL
-              value: {{ .Values.env.sonarJdbcUrl }}
+              value: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
             - name: SONAR_JDBC_USERNAME
-              value: {{ .Values.env.sonarJdbcUsername }}
+              value: sonar
             - name: SONAR_JDBC_PASSWORD
-              value: {{ .Values.env.sonarJdbcPassword }}
+              value: sonarpass
           securityContext:
-            runAsUser: 1001
-            runAsGroup: 1001
+            runAsUser: 1001  # Updated to a higher UID
+            runAsGroup: 1001  # Updated to a higher group
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
-              drop:
-                - ALL
+              drop: [ALL]
           resources:
             requests:
               cpu: "500m"
@@ -77,12 +74,27 @@ spec:
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.dataClaim }}
+            claimName: sonarqube-data-pvc
         - name: sonarqube-extensions
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.extensionsClaim }}
+            claimName: sonarqube-extensions-pvc
         - name: sonarqube-logs
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.logsClaim }}
+            claimName: sonarqube-logs-pvc
         - name: sonarqube-temp
           emptyDir: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sonarqube-allow-ingress
+  namespace: sonarqube
+spec:
+  podSelector:
+    matchLabels:
+      app: sonarqube
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
