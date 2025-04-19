@@ -15,7 +15,7 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 10001
+        fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       initContainers:
@@ -24,9 +24,13 @@ spec:
           command:
             - sh
             - -c
-            - chown -R 10001:10001 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp
+            - chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp
           securityContext:
             runAsUser: 0
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
@@ -38,8 +42,7 @@ spec:
               mountPath: /opt/sonarqube/temp
       containers:
         - name: sonarqube
-          # ✅ Image digest for CKV_K8S_43 compliance
-          image: "sonarqube@sha256:bd55a4c9f8e0972b556f4c4a2bc569fa14f9e1e7b7e891cf416225fd0136973b"  # Digest for 9.9.4-community
+          image: sonarqube@sha256:285e7d87b936a2b8d9732c62cf594309498013e59dc98e7470d28d30149ffb8a  # corresponds to 9.9.4-community
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
@@ -51,22 +54,20 @@ spec:
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
           securityContext:
-            runAsUser: 10001
-            runAsGroup: 10001
+            runAsUser: 1000
+            runAsGroup: 1000
             runAsNonRoot: true
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true  # ✅ Required for CKV_K8S_22
+            readOnlyRootFilesystem: true
             capabilities:
-              drop:
-                - ALL
-                - NET_RAW  # ✅ To satisfy CKV_K8S_28
+              drop: [ALL]
           resources:
             requests:
-              cpu: "500m"    # ✅ CKV_K8S_10
-              memory: "1Gi"  # ✅ CKV_K8S_12
+              cpu: "500m"
+              memory: "1Gi"
             limits:
-              cpu: "1"       # ✅ CKV_K8S_11
-              memory: "2Gi"  # ✅ CKV_K8S_13
+              cpu: "1"
+              memory: "2Gi"
           livenessProbe:
             httpGet:
               path: /about
@@ -104,7 +105,6 @@ spec:
             claimName: sonarqube-logs-pvc
         - name: sonarqube-temp
           emptyDir: {}
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
