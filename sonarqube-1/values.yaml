@@ -1,31 +1,100 @@
-sonarqube:
-  image:
-    repository: sonarqube
-    tag: 9.9.4-community
-  port: 9000
-  storage:
-    data: 20Gi
-    extensions: 2Gi
-    logs: 1Gi
-  securityContext:
-    fsGroup: 1000
-    runAsUser: 1000
-    runAsGroup: 1000
-
-service:
-  type: LoadBalancer
-  annotations: 
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-
-postgres:
-  image: postgres:15
-  user: sonar
-  password: sonarpass
-  database: sonarqube
-  port: 5432
-  storage: 5Gi
-
-ingress:
-  enabled: true
-  hostname: sonarqube.local
-  className: nginx
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube
+  namespace: sonarqube
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1001  # Updated to a higher UID
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: sonarqube
+          image: sonarqube:9.9.4-community # Replace with the image digest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+          env:
+            - name: SONAR_JDBC_URL
+              value: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
+            - name: SONAR_JDBC_USERNAME
+              value: sonar
+            - name: SONAR_JDBC_PASSWORD
+              value: sonarpass
+          securityContext:
+            runAsUser: 1001  # Updated to a higher UID
+            runAsGroup: 1001  # Updated to a higher group
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /about
+              port: 9000
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /about
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: sonarqube-data
+              mountPath: /opt/sonarqube/data
+            - name: sonarqube-extensions
+              mountPath: /opt/sonarqube/extensions
+            - name: sonarqube-logs
+              mountPath: /opt/sonarqube/logs
+            - name: sonarqube-temp
+              mountPath: /opt/sonarqube/temp
+      volumes:
+        - name: sonarqube-data
+          persistentVolumeClaim:
+            claimName: sonarqube-data-pvc
+        - name: sonarqube-extensions
+          persistentVolumeClaim:
+            claimName: sonarqube-extensions-pvc
+        - name: sonarqube-logs
+          persistentVolumeClaim:
+            claimName: sonarqube-logs-pvc
+        - name: sonarqube-temp
+          emptyDir: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sonarqube-allow-ingress
+  namespace: sonarqube
+spec:
+  podSelector:
+    matchLabels:
+      app: sonarqube
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
