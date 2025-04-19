@@ -15,20 +15,19 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 999  # Group ID used by PostgreSQL
+        fsGroup: 999
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: postgres
-          # ✅ Image with digest to pass CKV_K8S_43
-          image: "postgres@sha256:6b322b7dcfb2cb1ce2880dcceaf9a2a0bfa5c2d595bff0efb8582cdded3ff86a"  # Postgres 15
+          image: "postgres:15.3"
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
-            runAsUser: 10001  # ✅ High UID to pass CKV_K8S_40
+            runAsUser: 999
             readOnlyRootFilesystem: true
             capabilities:
               drop:
@@ -78,21 +77,3 @@ spec:
             claimName: postgres-pvc
         - name: postgresql-run
           emptyDir: {}
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: postgres-allow-sonarqube
-  namespace: sonarqube
-spec:
-  podSelector:
-    matchLabels:
-      app: postgres
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app: sonarqube
