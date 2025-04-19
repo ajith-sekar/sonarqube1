@@ -13,52 +13,88 @@ spec:
       labels:
         app: sonarqube
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: sonarqube
-          image: sonarqube:latest
+          image: sonarqube:9.9.4-community
+          imagePullPolicy: Always
           ports:
             - containerPort: 9000
-          volumeMounts:
-            - mountPath: /opt/sonarqube/data
-              name: sonarqube-data
-            - mountPath: /opt/sonarqube/temp
-              name: sonarqube-temp
-            - mountPath: /opt/sonarqube/logs
-              name: sonarqube-logs
+          env:
+            - name: SONAR_JDBC_URL
+              value: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
+            - name: SONAR_JDBC_USERNAME
+              value: sonar
+            - name: SONAR_JDBC_PASSWORD
+              value: sonarpass
           securityContext:
-            runAsUser: 1000  # Ensure the container runs as a non-root user
-            runAsGroup: 1000  # Same group as the user
-            fsGroup: 1000  # Ensure the group has permissions to write to the directories
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /about
+              port: 9000
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /about
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: sonarqube-data
+              mountPath: /opt/sonarqube/data
+            - name: sonarqube-extensions
+              mountPath: /opt/sonarqube/extensions
+            - name: sonarqube-logs
+              mountPath: /opt/sonarqube/logs
+            - name: sonarqube-temp
+              mountPath: /opt/sonarqube/temp
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
             claimName: sonarqube-data-pvc
+        - name: sonarqube-extensions
+          persistentVolumeClaim:
+            claimName: sonarqube-extensions-pvc
+        - name: sonarqube-logs
+          persistentVolumeClaim:
+            claimName: sonarqube-logs-pvc
         - name: sonarqube-temp
           emptyDir: {}
-        - name: sonarqube-logs
-          emptyDir: {}
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
 metadata:
-  name: sonarqube-data-pvc
+  name: sonarqube-allow-ingress
   namespace: sonarqube
 spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: sonarqube
-  namespace: sonarqube
-spec:
-  selector:
-    app: sonarqube
-  ports:
-    - protocol: TCP
-      port: 9000
-      targetPort: 9000
+  podSelector:
+    matchLabels:
+      app: sonarqube
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
