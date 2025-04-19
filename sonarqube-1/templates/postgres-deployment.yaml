@@ -77,3 +77,22 @@ spec:
             claimName: postgres-pvc
         - name: postgresql-run
           emptyDir: {}
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-allow-sonarqube
+  namespace: sonarqube
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: sonarqube
