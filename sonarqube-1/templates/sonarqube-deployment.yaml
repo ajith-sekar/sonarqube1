@@ -15,7 +15,7 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 10001
+        fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -32,8 +32,8 @@ spec:
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
           securityContext:
-            runAsUser: 10001
-            runAsGroup: 10001
+            runAsUser: 1000
+            runAsGroup: 1000
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
