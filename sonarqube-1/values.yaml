@@ -2,33 +2,36 @@ sonarqube:
   image:
     repository: sonarqube
     tag: 9.9.4-community
-    pullPolicy: Always
-  port: 9000
-  resources:
+    pullPolicy: Always  # ✅ CKV_K8S_15
+
+  resources:           # ✅ CKV_K8S_10, CKV_K8S_11, CKV_K8S_12, CKV_K8S_13
     requests:
-      cpu: "500m"
-      memory: "1Gi"
-    limits:
-      cpu: "1"
+      cpu: "1000m"
       memory: "2Gi"
-  storage:
-    data: 20Gi
-    extensions: 2Gi
-    logs: 1Gi
-  securityContext:
-    fsGroup: 1000
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+
+  securityContext:     # ✅ CKV_K8S_37
     runAsUser: 1000
     runAsGroup: 1000
     runAsNonRoot: true
+    fsGroup: 1000
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
     capabilities:
       drop:
         - ALL
 
+  port: 9000
+  storage:
+    data: 20Gi
+    extensions: 2Gi
+    logs: 1Gi
+
 service:
   type: LoadBalancer
-  annotations: 
+  annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
 postgres:
@@ -43,3 +46,9 @@ ingress:
   enabled: true
   hostname: sonarqube.local
   className: nginx
+
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector: {}
