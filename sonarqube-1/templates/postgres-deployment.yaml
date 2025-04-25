@@ -17,13 +17,6 @@ spec:
         fsGroup: 999
         seccompProfile:
           type: RuntimeDefault
-      initContainers:
-        - name: fix-permissions
-          image: busybox
-          command: ["sh", "-c", "chown -R 999:999 /var/lib/postgresql/data"]
-          volumeMounts:
-            - name: postgres-data
-              mountPath: /var/lib/postgresql/data
       containers:
         - name: postgres
           image: postgres:15.2
@@ -61,19 +54,18 @@ spec:
               mountPath: /var/lib/postgresql/data
           livenessProbe:
             exec:
-              command: ["pg_isready", "-U", "sonar", "-d", "sonarqube"]
+              command: ["pg_isready", "-U", "sonar"]
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "sonar", "-d", "sonarqube"]
+              command: ["pg_isready", "-U", "sonar"]
             initialDelaySeconds: 10
             periodSeconds: 5
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
-
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -86,9 +78,6 @@ spec:
   resources:
     requests:
       storage: 8Gi
-  # Uncomment and set if your cluster needs a storage class
-  # storageClassName: standard
-
 ---
 apiVersion: v1
 kind: Secret
@@ -98,3 +87,16 @@ metadata:
 type: Opaque
 stringData:
   password: sonarpass
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: sonarqube
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
