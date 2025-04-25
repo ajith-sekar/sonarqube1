@@ -28,7 +28,7 @@ spec:
       containers:
         - name: sonarqube
           image: sonarqube:9.9.4-community
-          imagePullPolicy: Always
+          imagePullPolicy: Always  # ✅ CKV_K8S_15
           ports:
             - containerPort: 9000
           env:
@@ -44,9 +44,10 @@ spec:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities:
-              drop: [ "ALL" ]
-          resources:
+            capabilities:            # ✅ CKV_K8S_37
+              drop:
+                - ALL
+          resources:                 # ✅ CKV_K8S_10, CKV_K8S_11, CKV_K8S_12, CKV_K8S_13
             requests:
               cpu: "500m"
               memory: "1Gi"
