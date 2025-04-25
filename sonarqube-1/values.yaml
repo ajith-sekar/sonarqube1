@@ -2,15 +2,7 @@ sonarqube:
   image:
     repository: sonarqube
     tag: 9.9.4-community
-    pullPolicy: Always
   port: 9000
-  resources:
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-    limits:
-      cpu: "1"
-      memory: "2Gi"
   storage:
     data: 20Gi
     extensions: 2Gi
@@ -19,12 +11,6 @@ sonarqube:
     fsGroup: 1000
     runAsUser: 1000
     runAsGroup: 1000
-    runAsNonRoot: true
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
 
 service:
   type: LoadBalancer
