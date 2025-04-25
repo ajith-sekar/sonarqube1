@@ -1,9 +1,60 @@
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "15.2"
+    pullPolicy: IfNotPresent
+
+  auth:
+    username: sonar
+    password: sonarpass
+    database: sonarqube
+    existingSecret: postgres-secret
+
+  securityContext:
+    enabled: true
+    runAsUser: 999
+    runAsGroup: 999
+    fsGroup: 999
+
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+  volume:
+    size: 8Gi
+    mountPath: /var/lib/postgresql/data
+    subPath: postgres
+    claimName: postgres-pvc
+
 sonarqube:
   image:
     repository: sonarqube
     tag: 9.9.4-community
     pullPolicy: Always
-  port: 9000
+
+  jdbc:
+    url: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
+    username: sonar
+    password: sonarpass
+
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: ["ALL"]
+
+  initContainer:
+    image: busybox:1.35
+    command: ["sh", "-c", "mkdir -p /opt/sonarqube/data/es7 && chown -R 1000:1000 /opt/sonarqube/data"]
+
   resources:
     requests:
       cpu: "500m"
@@ -11,35 +62,29 @@ sonarqube:
     limits:
       cpu: "1"
       memory: "2Gi"
-  storage:
-    data: 20Gi
-    extensions: 2Gi
-    logs: 1Gi
-  securityContext:
-    fsGroup: 1000
-    runAsUser: 1000
-    runAsGroup: 1000
-    runAsNonRoot: true
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
 
-service:
-  type: LoadBalancer
-  annotations: 
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+  volumeClaims:
+    data:
+      claimName: sonarqube-data-pvc
+    extensions:
+      claimName: sonarqube-extensions-pvc
+    logs:
+      claimName: sonarqube-logs-pvc
+    temp:
+      type: emptyDir
 
-postgres:
-  image: postgres:15
-  user: sonar
-  password: sonarpass
-  database: sonarqube
-  port: 5432
-  storage: 5Gi
-
-ingress:
-  enabled: true
-  hostname: sonarqube.local
-  className: nginx
+  probes:
+    liveness:
+      path: /about
+      port: 9000
+      initialDelaySeconds: 60
+      periodSeconds: 20
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readiness:
+      path: /about
+      port: 9000
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
