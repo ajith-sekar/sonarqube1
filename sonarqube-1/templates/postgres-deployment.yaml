@@ -40,7 +40,8 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
-              drop: [ "ALL" ]
+              drop:
+                - ALL
           resources:
             requests:
               cpu: "250m"
@@ -51,15 +52,14 @@ spec:
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
-              subPath: postgres
           livenessProbe:
             exec:
-              command: [ "pg_isready", "-U", "sonar" ]
+              command: ["pg_isready", "-U", "sonar"]
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             exec:
-              command: [ "pg_isready", "-U", "sonar" ]
+              command: ["pg_isready", "-U", "sonar"]
             initialDelaySeconds: 10
             periodSeconds: 5
       volumes:
