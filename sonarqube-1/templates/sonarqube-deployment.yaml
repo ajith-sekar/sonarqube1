@@ -49,11 +49,11 @@ spec:
                 - ALL
           resources:
             requests:
-              cpu: "1000m"
-              memory: "2Gi"
+              cpu: "500m"
+              memory: "1Gi"
             limits:
-              cpu: "2000m"
-              memory: "4Gi"
+              cpu: "1"
+              memory: "2Gi"
           livenessProbe:
             httpGet:
               path: /about
@@ -91,13 +91,11 @@ spec:
             claimName: sonarqube-logs-pvc
         - name: sonarqube-temp
           emptyDir: {}
-
 ---
-
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: sonarqube-allow-ingress
+  name: allow-sonarqube
   namespace: sonarqube
 spec:
   podSelector:
@@ -107,4 +105,7 @@ spec:
     - Ingress
   ingress:
     - from:
-        - namespaceSelector: {}
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9000
