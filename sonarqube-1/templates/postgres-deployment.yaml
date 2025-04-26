@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: postgres
   namespace: sonarqube
+  labels:
+    app: postgres
 spec:
   replicas: 1
   selector:
@@ -19,8 +21,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgres
-          image: postgres:15.2
-          imagePullPolicy: IfNotPresent
+          image: postgres:15.4
+          imagePullPolicy: Always
           ports:
             - containerPort: 5432
           env:
@@ -29,10 +31,20 @@ spec:
             - name: POSTGRES_USER
               value: sonar
             - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: password
+              value: sonarpass
+            - name: PGDATA
+              value: /var/lib/postgresql/pgdata
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/pgdata
+              subPath: pgdata
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           securityContext:
             runAsUser: 999
             runAsGroup: 999
@@ -42,26 +54,6 @@ spec:
             capabilities:
               drop:
                 - ALL
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "512Mi"
-            limits:
-              cpu: "500m"
-              memory: "1Gi"
-          volumeMounts:
-            - name: postgres-data
-              mountPath: /var/lib/postgresql/data
-          livenessProbe:
-            exec:
-              command: ["pg_isready", "-U", "sonar"]
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            exec:
-              command: ["pg_isready", "-U", "sonar"]
-            initialDelaySeconds: 10
-            periodSeconds: 5
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
@@ -77,26 +69,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 8Gi
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: postgres-secret
-  namespace: sonarqube
-type: Opaque
-stringData:
-  password: sonarpass
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres
-  namespace: sonarqube
-spec:
-  selector:
-    app: postgres
-  ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432
+      storage: 5Gi
+  storageClassName: standard
