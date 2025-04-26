@@ -1,31 +1,55 @@
+# values.yaml for SonarQube and PostgreSQL
+
+postgres:
+  image:
+    repository: postgres
+    tag: "15.2"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+  persistence:
+    size: 8Gi
+    storageClass: standard
+  auth:
+    database: sonarqube
+    username: sonar
+    password: sonarpass
+
 sonarqube:
   image:
     repository: sonarqube
     tag: 9.9.4-community
-  port: 9000
-  storage:
-    data: 20Gi
-    extensions: 2Gi
-    logs: 1Gi
-  securityContext:
-    fsGroup: 1000
-    runAsUser: 1000
-    runAsGroup: 1000
-
-service:
-  type: LoadBalancer
-  annotations: 
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-
-postgres:
-  image: postgres:15
-  user: sonar
-  password: sonarpass
-  database: sonarqube
-  port: 5432
-  storage: 5Gi
-
-ingress:
-  enabled: true
-  hostname: sonarqube.local
-  className: nginx
+    pullPolicy: Always
+  env:
+    SONAR_JDBC_URL: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
+    SONAR_JDBC_USERNAME: sonar
+    SONAR_JDBC_PASSWORD: sonarpass
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+  persistence:
+    data:
+      size: 5Gi
+      existingClaim: sonarqube-data-pvc
+    extensions:
+      size: 2Gi
+      existingClaim: sonarqube-extensions-pvc
+    logs:
+      size: 1Gi
+      existingClaim: sonarqube-logs-pvc
+    temp:
+      emptyDir: true
+  networkPolicy:
+    enabled: true
+    ingress:
+      - from:
+          - namespaceSelector: {}
