@@ -33,6 +33,8 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           securityContext:
             runAsUser: 999
             runAsGroup: 999
@@ -78,7 +80,7 @@ spec:
   resources:
     requests:
       storage: 8Gi
-  storageClassName: standard  # Adjust the StorageClass to your cluster's configuration if necessary
+  storageClassName: standard  # ✅ adjust if needed
 ---
 apiVersion: v1
 kind: Secret
