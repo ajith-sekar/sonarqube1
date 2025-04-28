@@ -20,8 +20,28 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: fix-permissions
-          image: busybox:1.35  # pinned version for stability
-          command: ["sh", "-c", "mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp && chown -R 1000:1000 /opt/sonarqube"]
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp && chown -R 1000:1000 /opt/sonarqube
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
@@ -45,7 +65,7 @@ spec:
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
             - name: SONAR_JVM_OPTS
-              value: "-Xmx1g -Xms512m -XX:+ExitOnOutOfMemoryError"  # <-- JVM tuning
+              value: "-Xmx1g -Xms512m -XX:+ExitOnOutOfMemoryError"
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -112,4 +132,4 @@ spec:
     - Ingress
   ingress:
     - from:
-        - namespaceSelector: {}  # ⚠️ allows from any namespace; restrict if needed
+        - namespaceSelector: {}
