@@ -98,6 +98,7 @@ spec:
             claimName: sonarqube-logs-pvc
         - name: sonarqube-temp
           emptyDir: {}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
