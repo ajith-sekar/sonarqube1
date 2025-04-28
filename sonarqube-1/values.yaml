@@ -8,7 +8,7 @@ postgres:
       cpu: "500m"
       memory: "1Gi"
     limits:
-      cpu: "1"
+      cpu: "1000m"
       memory: "2Gi"
   persistence:
     size: 8Gi
@@ -32,7 +32,7 @@ sonarqube:
       cpu: "500m"
       memory: "1Gi"
     limits:
-      cpu: "1"
+      cpu: "1000m"
       memory: "2Gi"
   persistence:
     data:
