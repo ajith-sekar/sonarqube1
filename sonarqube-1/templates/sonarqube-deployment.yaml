@@ -20,11 +20,17 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: fix-permissions
-          image: busybox
-          command: ["sh", "-c", "mkdir -p /opt/sonarqube/data/es7 && chown -R 1000:1000 /opt/sonarqube/data"]
+          image: busybox:1.35  # pinned version for stability
+          command: ["sh", "-c", "mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp && chown -R 1000:1000 /opt/sonarqube"]
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
+            - name: sonarqube-extensions
+              mountPath: /opt/sonarqube/extensions
+            - name: sonarqube-logs
+              mountPath: /opt/sonarqube/logs
+            - name: sonarqube-temp
+              mountPath: /opt/sonarqube/temp
       containers:
         - name: sonarqube
           image: sonarqube:9.9.4-community
@@ -38,6 +44,8 @@ spec:
               value: sonar
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
+            - name: SONAR_JVM_OPTS
+              value: "-Xmx1g -Xms512m -XX:+ExitOnOutOfMemoryError"  # <-- JVM tuning
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -49,24 +57,24 @@ spec:
           resources:
             requests:
               cpu: "500m"
-              memory: "1Gi"
+              memory: "2Gi"
             limits:
               cpu: "1"
-              memory: "2Gi"
+              memory: "3Gi"
           livenessProbe:
             httpGet:
               path: /about
               port: 9000
-            initialDelaySeconds: 60
-            periodSeconds: 20
+            initialDelaySeconds: 90
+            periodSeconds: 30
             timeoutSeconds: 5
-            failureThreshold: 3
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /about
               port: 9000
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 60
+            periodSeconds: 15
             timeoutSeconds: 3
             failureThreshold: 3
           volumeMounts:
@@ -104,4 +112,4 @@ spec:
     - Ingress
   ingress:
     - from:
-        - namespaceSelector: {}
+        - namespaceSelector: {}  # ⚠️ allows from any namespace; restrict if needed
