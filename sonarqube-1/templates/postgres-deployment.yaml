@@ -13,7 +13,6 @@ spec:
       labels:
         app: postgres
     spec:
-      automountServiceAccountToken: false  # ✅ Fix for CKV_K8S_38
       securityContext:
         fsGroup: 999
         seccompProfile:
@@ -21,7 +20,7 @@ spec:
       containers:
         - name: postgres
           image: postgres:15.2
-          imagePullPolicy: Always  # ✅ Fix for CKV_K8S_15
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
           env:
@@ -69,7 +68,6 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
-
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -82,8 +80,7 @@ spec:
   resources:
     requests:
       storage: 8Gi
-  storageClassName: standard
-
+  storageClassName: standard  # ✅ adjust if needed
 ---
 apiVersion: v1
 kind: Secret
@@ -93,22 +90,3 @@ metadata:
 type: Opaque
 stringData:
   password: sonarpass
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: postgres-allow-ingress
-  namespace: sonarqube
-spec:
-  podSelector:
-    matchLabels:
-      app: postgres
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - namespaceSelector: {}  # Allow from all namespaces (you can restrict later)
-      ports:
-        - protocol: TCP
-          port: 5432
