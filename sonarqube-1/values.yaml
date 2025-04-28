@@ -21,7 +21,7 @@ postgres:
 sonarqube:
   image:
     repository: sonarqube
-    tag: 9.9.4-community
+    tag: "9.9.4-community"
     pullPolicy: Always
   env:
     SONAR_JDBC_URL: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
@@ -51,3 +51,4 @@ sonarqube:
     ingress:
       - from:
           - namespaceSelector: {}
+
