@@ -34,7 +34,7 @@ spec:
       containers:
         - name: sonarqube
           image: sonarqube:9.9.4-community
-          imagePullPolicy: Always  # Ensuring the image is always pulled for fresh updates
+          imagePullPolicy: Always
           ports:
             - containerPort: 9000
           env:
@@ -45,14 +45,14 @@ spec:
             - name: SONAR_JDBC_PASSWORD
               value: sonarpass
             - name: SONAR_JVM_OPTS
-              value: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"  # JVM tuning for production
+              value: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"
           resources:
             requests:
               cpu: "500m"
               memory: "1Gi"
             limits:
               cpu: "1"
-              memory: "2Gi"  # Adding both CPU and Memory limits
+              memory: "2Gi"  # Adding both CPU and Memory limits explicitly here
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -60,8 +60,7 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
-              drop: [ALL]  # Minimized capabilities for increased security
-        
+              drop: [ALL]
           livenessProbe:
             httpGet:
               path: /about
@@ -116,4 +115,4 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              name: sonarqube  # Restricting to the same namespace for increased security
+              name: sonarqube
