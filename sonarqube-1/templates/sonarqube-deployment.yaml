@@ -46,6 +46,13 @@ spec:
               value: sonarpass
             - name: SONAR_JVM_OPTS
               value: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"  # JVM tuning for production
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"  # Adding both CPU and Memory limits
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -54,13 +61,7 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: [ALL]  # Minimized capabilities for increased security
-          resources:
-            requests:
-              cpu: "1"      # Set CPU request for production
-              memory: "4Gi"  # Set memory request for production
-            limits:
-              cpu: "2"      # Set CPU limit for production
-              memory: "8Gi"  # Set memory limit for production
+        
           livenessProbe:
             httpGet:
               path: /about
