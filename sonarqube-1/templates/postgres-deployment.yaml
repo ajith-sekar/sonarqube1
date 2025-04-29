@@ -13,7 +13,7 @@ spec:
       labels:
         app: postgres
     spec:
-      automountServiceAccountToken: false # 🛠️ Added to fix CKV_K8S_38
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 999
         seccompProfile:
@@ -21,7 +21,7 @@ spec:
       containers:
         - name: postgres
           image: postgres:15.2
-          imagePullPolicy: Always # 🛠️ Changed to fix CKV_K8S_15
+          imagePullPolicy: Always
           ports:
             - containerPort: 5432
           env:
@@ -50,7 +50,7 @@ spec:
               cpu: "500m"
               memory: "1Gi"
             limits:
-              cpu: "1"
+              cpu: "1000m"
               memory: "2Gi"
           volumeMounts:
             - name: postgres-data
