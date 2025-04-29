@@ -57,10 +57,11 @@ spec:
             runAsUser: 1000
             runAsGroup: 1000
             runAsNonRoot: true
-            allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
             capabilities:
-              drop: ["ALL"]
+              drop:
+                - ALL
           livenessProbe:
             httpGet:
               path: /about
