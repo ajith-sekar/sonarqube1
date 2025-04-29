@@ -15,9 +15,21 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 999   # Ensure the mounted volume is owned by user 999
+        fsGroup: 999  # Ensure the mounted volume is owned by group 999
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command:
+            - "sh"
+            - "-c"
+            - |
+              chmod -R 777 /var/lib/postgresql/data
+              chown -R 999:999 /var/lib/postgresql/data
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
       containers:
         - name: postgres
           image: postgres:15.2
@@ -35,7 +47,7 @@ spec:
                   name: postgres-secret
                   key: password
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata  # Correct PGDATA path
+              value: /var/lib/postgresql/data/pgdata
           securityContext:
             runAsUser: 999
             runAsGroup: 999
