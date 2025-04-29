@@ -1,54 +1,26 @@
-postgres:
-  image:
-    repository: postgres
-    tag: "15.2"
-    pullPolicy: IfNotPresent
-  resources:
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-    limits:
-      cpu: "1000m"
-      memory: "2Gi"
-  persistence:
-    size: 8Gi
-    storageClass: standard
-  auth:
-    database: sonarqube
-    username: sonar
-    password: sonarpass
-
 sonarqube:
   image:
     repository: sonarqube
-    tag: "9.9.4-community"
-    pullPolicy: Always
+    tag: 9.9.4-community
+    pullPolicy: Always  # CKV_K8S_15 requires Always
+
   env:
-    SONAR_JDBC_URL: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
-    SONAR_JDBC_USERNAME: sonar
-    SONAR_JDBC_PASSWORD: sonarpass
-    SONAR_JVM_OPTS: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"
+    SONAR_JDBC_URL: jdbc:postgresql://your-postgres-host/sonarqube
+    SONAR_JDBC_USERNAME: sonaruser
+    SONAR_JDBC_PASSWORD: sonarpassword
+
   resources:
     requests:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: "500m"      # CKV_K8S_10: CPU requests
+      memory: "1Gi"    # CKV_K8S_12: Memory requests
     limits:
-      cpu: "1000m"
-      memory: "2Gi"
+      cpu: "1000m"     # CKV_K8S_11: CPU limits
+      memory: "2Gi"    # CKV_K8S_13: Memory limits
+
   persistence:
     data:
-      size: 5Gi
       existingClaim: sonarqube-data-pvc
     extensions:
-      size: 2Gi
       existingClaim: sonarqube-extensions-pvc
     logs:
-      size: 1Gi
       existingClaim: sonarqube-logs-pvc
-    temp:
-      emptyDir: true
-  networkPolicy:
-    enabled: true
-    ingress:
-      - from:
-          - namespaceSelector: {}  # allows from all namespaces — adjust for stricter control
