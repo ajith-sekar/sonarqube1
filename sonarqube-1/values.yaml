@@ -27,6 +27,7 @@ sonarqube:
     SONAR_JDBC_URL: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
     SONAR_JDBC_USERNAME: sonar
     SONAR_JDBC_PASSWORD: sonarpass
+    SONAR_JVM_OPTS: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"
   resources:
     requests:
       cpu: "500m"
@@ -50,4 +51,4 @@ sonarqube:
     enabled: true
     ingress:
       - from:
-          - namespaceSelector: {}
+          - namespaceSelector: {}  # allows from all namespaces — adjust for stricter control
