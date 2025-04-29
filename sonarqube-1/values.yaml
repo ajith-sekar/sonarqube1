@@ -1,26 +1,54 @@
-sonarqube:
+postgres:
   image:
-    repository: sonarqube
-    tag: 9.9.1-community
-    pullPolicy: Always
-
-  env:
-    SONAR_JDBC_URL: jdbc:postgresql://postgresql:5432/sonarqube
-    SONAR_JDBC_USERNAME: sonar
-    SONAR_JDBC_PASSWORD: sonar
-
+    repository: postgres
+    tag: "15.2"
+    pullPolicy: IfNotPresent
   resources:
     requests:
       cpu: "500m"
-      memory: "2Gi"
+      memory: "1Gi"
     limits:
       cpu: "1000m"
-      memory: "4Gi"
+      memory: "2Gi"
+  persistence:
+    size: 8Gi
+    storageClass: standard
+  auth:
+    database: sonarqube
+    username: sonar
+    password: sonarpass
 
+sonarqube:
+  image:
+    repository: sonarqube
+    tag: "9.9.4-community"
+    pullPolicy: Always
+  env:
+    SONAR_JDBC_URL: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
+    SONAR_JDBC_USERNAME: sonar
+    SONAR_JDBC_PASSWORD: sonarpass
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
   persistence:
     data:
+      size: 5Gi
       existingClaim: sonarqube-data-pvc
     extensions:
+      size: 2Gi
       existingClaim: sonarqube-extensions-pvc
     logs:
+      size: 1Gi
       existingClaim: sonarqube-logs-pvc
+    temp:
+      emptyDir: true
+  networkPolicy:
+    enabled: true
+    ingress:
+      - from:
+          - namespaceSelector: {}
+
