@@ -15,7 +15,7 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 999
+        fsGroup: 999   # Ensure the mounted volume is owned by user 999
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -35,7 +35,7 @@ spec:
                   name: postgres-secret
                   key: password
             - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+              value: /var/lib/postgresql/data/pgdata  # Correct PGDATA path
           securityContext:
             runAsUser: 999
             runAsGroup: 999
@@ -69,6 +69,7 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -82,6 +83,7 @@ spec:
     requests:
       storage: 8Gi
   storageClassName: standard
+
 ---
 apiVersion: v1
 kind: Secret
