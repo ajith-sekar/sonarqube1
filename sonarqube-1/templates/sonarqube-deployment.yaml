@@ -20,7 +20,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: fix-permissions
-          image: busybox:1.35  # pinned version for stability
+          image: busybox:1.35
           command: ["sh", "-c", "mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp && chown -R 1000:1000 /opt/sonarqube"]
           volumeMounts:
             - name: sonarqube-data
@@ -33,26 +33,26 @@ spec:
               mountPath: /opt/sonarqube/temp
       containers:
         - name: sonarqube
-          image: sonarqube:9.9.4-community
-          imagePullPolicy: Always
+          image: "{{ .Values.sonarqube.image.repository }}:{{ .Values.sonarqube.image.tag }}"
+          imagePullPolicy: {{ .Values.sonarqube.image.pullPolicy | quote }}
           ports:
             - containerPort: 9000
           env:
             - name: SONAR_JDBC_URL
-              value: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
+              value: {{ .Values.sonarqube.env.SONAR_JDBC_URL | quote }}
             - name: SONAR_JDBC_USERNAME
-              value: sonar
+              value: {{ .Values.sonarqube.env.SONAR_JDBC_USERNAME | quote }}
             - name: SONAR_JDBC_PASSWORD
-              value: sonarpass
+              value: {{ .Values.sonarqube.env.SONAR_JDBC_PASSWORD | quote }}
             - name: SONAR_JVM_OPTS
               value: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"
           resources:
             requests:
-              cpu: {{ .Values.sonarqube.resources.requests.cpu }}
-              memory: {{ .Values.sonarqube.resources.requests.memory }}
+              cpu: {{ .Values.sonarqube.resources.requests.cpu | quote }}
+              memory: {{ .Values.sonarqube.resources.requests.memory | quote }}
             limits:
-              cpu: {{ .Values.sonarqube.resources.limits.cpu }}
-              memory: {{ .Values.sonarqube.resources.limits.memory }}
+              cpu: {{ .Values.sonarqube.resources.limits.cpu | quote }}
+              memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -60,7 +60,7 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
-              drop: [ALL]
+              drop: ["ALL"]
           livenessProbe:
             httpGet:
               path: /about
@@ -89,30 +89,12 @@ spec:
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
-            claimName: sonarqube-data-pvc
+            claimName: {{ .Values.sonarqube.persistence.data.existingClaim }}
         - name: sonarqube-extensions
           persistentVolumeClaim:
-            claimName: sonarqube-extensions-pvc
+            claimName: {{ .Values.sonarqube.persistence.extensions.existingClaim }}
         - name: sonarqube-logs
           persistentVolumeClaim:
-            claimName: sonarqube-logs-pvc
+            claimName: {{ .Values.sonarqube.persistence.logs.existingClaim }}
         - name: sonarqube-temp
           emptyDir: {}
-
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: sonarqube-allow-ingress
-  namespace: sonarqube
-spec:
-  podSelector:
-    matchLabels:
-      app: sonarqube
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              name: sonarqube
