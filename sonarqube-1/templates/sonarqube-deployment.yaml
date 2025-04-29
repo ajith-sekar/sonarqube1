@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonarqube
+  labels:
+    app: sonarqube
 spec:
   replicas: 1
   selector:
@@ -16,13 +18,11 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: fix-permissions
-          image: busybox
+          image: alpine
           command:
-            [
-              "sh",
-              "-c",
-              "chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs"
-            ]
+            - sh
+            - -c
+            - chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
@@ -35,10 +35,6 @@ spec:
           image: sonarqube:9.9.4-community
           ports:
             - containerPort: 9000
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            allowPrivilegeEscalation: false
           env:
             - name: SONAR_JDBC_URL
               value: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
@@ -53,6 +49,17 @@ spec:
               mountPath: /opt/sonarqube/extensions
             - name: sonarqube-logs
               mountPath: /opt/sonarqube/logs
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1"
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
