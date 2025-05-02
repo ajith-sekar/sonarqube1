@@ -24,9 +24,9 @@ spec:
           command:
             - sh
             - -c
-            - >
-              mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp &&
-              chown -R 1000:1000 /opt/sonarqube
+            - |
+              mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp && \
+              chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
@@ -38,26 +38,29 @@ spec:
               mountPath: /opt/sonarqube/temp
       containers:
         - name: sonarqube
-          image: "sonarqube:9.9.4-community"
-          imagePullPolicy: Always
+          image: sonarqube:9.9.4-community
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9000
           env:
             - name: SONAR_JDBC_URL
-              value: "jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube"
+              value: jdbc:postgresql://postgres:5432/sonarqube
             - name: SONAR_JDBC_USERNAME
-              value: "sonar"
+              value: sonar
             - name: SONAR_JDBC_PASSWORD
-              value: "sonarpass"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
             - name: SONAR_JVM_OPTS
               value: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"
           resources:
             requests:
-              cpu: "250m"
-              memory: "1Gi"
+              cpu: "500m"
+              memory: "2Gi"
             limits:
               cpu: "1000m"
-              memory: "2Gi"
+              memory: "4Gi"
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -65,7 +68,8 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
-              drop: ["ALL"]
+              drop:
+                - ALL
           livenessProbe:
             httpGet:
               path: /about
