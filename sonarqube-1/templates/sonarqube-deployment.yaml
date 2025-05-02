@@ -15,7 +15,7 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 1000
+        fsGroup: 999
         seccompProfile:
           type: RuntimeDefault
       initContainers:
@@ -54,8 +54,8 @@ spec:
               cpu: {{ .Values.sonarqube.resources.limits.cpu | quote }}
               memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
           securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
+            runAsUser: 999
+            runAsGroup: 999
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
