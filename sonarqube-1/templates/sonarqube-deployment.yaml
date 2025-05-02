@@ -15,13 +15,18 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 999
+        fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       initContainers:
         - name: fix-permissions
           image: busybox:1.35
-          command: ["sh", "-c", "mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp && chown -R 1000:1000 /opt/sonarqube"]
+          command:
+            - sh
+            - -c
+            - >
+              mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp &&
+              chown -R 1000:1000 /opt/sonarqube
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
@@ -33,32 +38,32 @@ spec:
               mountPath: /opt/sonarqube/temp
       containers:
         - name: sonarqube
-          image: "{{ .Values.sonarqube.image.repository }}:{{ .Values.sonarqube.image.tag }}"
-          imagePullPolicy: {{ .Values.sonarqube.image.pullPolicy }}
+          image: "sonarqube:9.9.4-community"
+          imagePullPolicy: Always
           ports:
             - containerPort: 9000
           env:
             - name: SONAR_JDBC_URL
-              value: {{ .Values.sonarqube.env.SONAR_JDBC_URL | quote }}
+              value: "jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube"
             - name: SONAR_JDBC_USERNAME
-              value: {{ .Values.sonarqube.env.SONAR_JDBC_USERNAME | quote }}
+              value: "sonar"
             - name: SONAR_JDBC_PASSWORD
-              value: {{ .Values.sonarqube.env.SONAR_JDBC_PASSWORD | quote }}
+              value: "sonarpass"
             - name: SONAR_JVM_OPTS
               value: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"
           resources:
             requests:
-              cpu: {{ .Values.sonarqube.resources.requests.cpu | quote }}
-              memory: {{ .Values.sonarqube.resources.requests.memory | quote }}
+              cpu: "250m"
+              memory: "1Gi"
             limits:
-              cpu: {{ .Values.sonarqube.resources.limits.cpu | quote }}
-              memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
+              cpu: "1000m"
+              memory: "2Gi"
           securityContext:
-            runAsUser: 999
-            runAsGroup: 999
+            runAsUser: 1000
+            runAsGroup: 1000
             runAsNonRoot: true
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false
             capabilities:
               drop: ["ALL"]
           livenessProbe:
