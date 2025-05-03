@@ -95,12 +95,12 @@ spec:
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
-            claimName: sonarqube-data-pvc
+            claimName: {{ .Values.sonarqube.persistence.data.existingClaim }}
         - name: sonarqube-extensions
           persistentVolumeClaim:
-            claimName: sonarqube-extensions-pvc
+            claimName: {{ .Values.sonarqube.persistence.extensions.existingClaim }}
         - name: sonarqube-logs
           persistentVolumeClaim:
-            claimName: sonarqube-logs-pvc
+            claimName: {{ .Values.sonarqube.persistence.logs.existingClaim }}
         - name: sonarqube-temp
           emptyDir: {}
