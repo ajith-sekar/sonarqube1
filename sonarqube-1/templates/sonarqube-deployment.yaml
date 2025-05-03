@@ -38,20 +38,17 @@ spec:
               mountPath: /opt/sonarqube/temp
       containers:
         - name: sonarqube
-          image: sonarqube:9.9.4-community
-          imagePullPolicy: IfNotPresent
+          image: "{{ .Values.sonarqube.image.repository }}:{{ .Values.sonarqube.image.tag }}"
+          imagePullPolicy: {{ .Values.sonarqube.image.pullPolicy }}
           ports:
             - containerPort: 9000
           env:
             - name: SONAR_JDBC_URL
-              value: jdbc:postgresql://postgres:5432/sonarqube
+              value: {{ .Values.sonarqube.env.SONAR_JDBC_URL | quote }}
             - name: SONAR_JDBC_USERNAME
-              value: sonar
+              value: {{ .Values.sonarqube.env.SONAR_JDBC_USERNAME | quote }}
             - name: SONAR_JDBC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: password
+              value: {{ .Values.sonarqube.env.SONAR_JDBC_PASSWORD | quote }}
             - name: SONAR_JVM_OPTS
               value: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"
           resources:
@@ -60,8 +57,7 @@ spec:
               memory: {{ .Values.sonarqube.resources.requests.memory | quote }}
             limits:
               cpu: {{ .Values.sonarqube.resources.limits.cpu | quote }}
-               memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
-
+              memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
