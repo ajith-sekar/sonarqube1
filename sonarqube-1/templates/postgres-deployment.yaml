@@ -80,27 +80,3 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-pvc
-  namespace: sonarqube
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: {{ .Values.postgres.persistence.size | quote }}
-  storageClassName: {{ .Values.postgres.persistence.storageClass | quote }}
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: postgres-secret
-  namespace: sonarqube
-type: Opaque
-stringData:
-  password: {{ .Values.postgres.auth.password | quote }}
