@@ -56,11 +56,12 @@ spec:
               value: "-Xmx2g -Xms1g -XX:+ExitOnOutOfMemoryError"
           resources:
             requests:
-              cpu: "250m"
-              memory: "2Gi"
+              cpu: {{ .Values.sonarqube.resources.requests.cpu | quote }}
+              memory: {{ .Values.sonarqube.resources.requests.memory | quote }}
             limits:
-              cpu: "1000m"
-              memory: "4Gi"
+              cpu: {{ .Values.sonarqube.resources.limits.cpu | quote }}
+               memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
+
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
