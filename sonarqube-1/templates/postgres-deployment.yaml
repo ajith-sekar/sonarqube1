@@ -57,12 +57,14 @@ spec:
               drop:
                 - ALL
           resources:
-            requests:
-              cpu: "250m"
-              memory: "1Gi"
-            limits:
-              cpu: "1000m"
-              memory: "2Gi"
+            resources:
+  requests:
+    cpu: {{ .Values.postgres.resources.requests.cpu | quote }}
+    memory: {{ .Values.postgres.resources.requests.memory | quote }}
+  limits:
+    cpu: {{ .Values.postgres.resources.limits.cpu | quote }}
+    memory: {{ .Values.postgres.resources.limits.memory | quote }}
+
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
