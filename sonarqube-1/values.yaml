@@ -5,11 +5,11 @@ postgres:
     pullPolicy: IfNotPresent
   resources:
     requests:
-      cpu: "200m"
-      memory: "1Gi"
+      cpu: "100m"
+      memory: "512Mi"
     limits:
       cpu: "500m"
-      memory: "2Gi"
+      memory: "1Gi"
   persistence:
     size: 8Gi
     storageClass: standard
@@ -32,7 +32,7 @@ sonarqube:
       cpu: "200m"
       memory: "1Gi"
     limits:
-      cpu: "500m"
+      cpu: "1000m"
       memory: "2Gi"
   persistence:
     data:
