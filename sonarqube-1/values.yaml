@@ -5,10 +5,10 @@ postgres:
     pullPolicy: Always
   resources:
     requests:
-      cpu: "100m"
+      cpu: "0m"
       memory: "512Mi"
     limits:
-      cpu: "500m"
+      cpu: "100m"
       memory: "1Gi"
   persistence:
     size: 8Gi
@@ -29,10 +29,10 @@ sonarqube:
     SONAR_JDBC_PASSWORD: sonarpass
   resources:
     requests:
-      cpu: "100m"
+      cpu: "0m"
       memory: "512Mi"
     limits:
-      cpu: "500m"
+      cpu: "100m"
       memory: "1Gi"
   persistence:
     data:
