@@ -12,7 +12,7 @@ postgres:
       memory: "2Gi"
   persistence:
     size: 8Gi
-    storageClass: gp3
+    storageClass: gp3-csi
   auth:
     database: sonarqube
     username: sonar
