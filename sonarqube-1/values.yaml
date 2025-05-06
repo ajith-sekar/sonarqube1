@@ -2,7 +2,7 @@ postgres:
   image:
     repository: postgres
     tag: "15.2"
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   resources:
     requests:
       cpu: "0m"
