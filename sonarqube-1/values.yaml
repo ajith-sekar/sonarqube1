@@ -5,7 +5,7 @@ postgres:
     pullPolicy: IfNotPresent
   resources:
     requests:
-      cpu: "100m"
+      cpu: "0m"
       memory: "512Mi"
     limits:
       cpu: "500m"
@@ -29,7 +29,7 @@ sonarqube:
     SONAR_JDBC_PASSWORD: sonarpass
   resources:
     requests:
-      cpu: "100m"
+      cpu: "0m"
       memory: "512Mi"
     limits:
       cpu: "500m"
