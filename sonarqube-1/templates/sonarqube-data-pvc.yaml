@@ -8,5 +8,5 @@ spec:
   resources:
     requests:
       storage: 20Gi
-  storageClassName: gp3
+  storageClassName: gp3-csi
   volumeName: sonarqube-data-pv
