@@ -10,4 +10,4 @@ spec:
   hostPath:
     path: /mnt/data/sonarqube/extensions
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: manual
+  storageClassName: gp3
