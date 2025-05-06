@@ -29,10 +29,10 @@ sonarqube:
     SONAR_JDBC_PASSWORD: sonarpass
   resources:
     requests:
-      cpu: "0m"
+      cpu: "100m"
       memory: "512Mi"
     limits:
-      cpu: "100m"
+      cpu: "500m"
       memory: "1Gi"
   persistence:
     data:
