@@ -5,10 +5,10 @@ postgres:
     pullPolicy: Always
   resources:
     requests:
-      cpu: "0m"
+      cpu: "100m"
       memory: "512Mi"
     limits:
-      cpu: "100m"
+      cpu: "500m"
       memory: "1Gi"
   persistence:
     size: 8Gi
@@ -17,6 +17,10 @@ postgres:
     database: sonarqube
     username: sonar
     password: sonarpass
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 999
+    fsGroup: 999
 
 sonarqube:
   image:
@@ -30,11 +34,11 @@ sonarqube:
     SONAR_JVM_OPTS: "-Xmx512m -Xms256m -XX:+ExitOnOutOfMemoryError"
   resources:
     requests:
-      cpu: "100m"
-      memory: "512Mi"
-    limits:
-      cpu: "500m"
+      cpu: "200m"
       memory: "1Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
   persistence:
     data:
       size: 5Gi
@@ -47,6 +51,28 @@ sonarqube:
       existingClaim: sonarqube-logs-pvc
     temp:
       emptyDir: true
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 9000
+    initialDelaySeconds: 90
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 6
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 9000
+    initialDelaySeconds: 90
+    periodSeconds: 20
+    timeoutSeconds: 10
+    failureThreshold: 6
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
   networkPolicy:
     enabled: true
     ingress:
