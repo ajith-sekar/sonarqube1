@@ -27,14 +27,13 @@ sonarqube:
     SONAR_JDBC_URL: jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube
     SONAR_JDBC_USERNAME: sonar
     SONAR_JDBC_PASSWORD: sonarpass
-    SONAR_JVM_OPTS: "-Xmx512m -Xms256m -XX:+ExitOnOutOfMemoryError"
   resources:
     requests:
-      cpu: "50m"
-      memory: "1Gi"
+      cpu: "100m"
+      memory: "512Mi"
     limits:
-      cpu: "1"
-      memory: "2Gi"
+      cpu: "500m"
+      memory: "1Gi"
   persistence:
     data:
       size: 5Gi
