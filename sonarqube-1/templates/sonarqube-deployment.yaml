@@ -52,7 +52,7 @@ spec:
             - name: SONAR_JVM_OPTS
               value: {{ .Values.sonarqube.env.SONAR_JVM_OPTS | quote }}
             - name: SONAR_AUTHENTICATION_ANONYMOUS
-              value: {{ .Values.sonarqube.env.SONAR_AUTHENTICATION_ANONYMOUS | quote }}
+              value: "true"  # Added the anonymous access environment variable
             - name: SONAR_WEB_CONTEXT_PATH
               value: {{ .Values.sonarqube.env.SONAR_WEB_CONTEXT_PATH | quote }}
           resources:
