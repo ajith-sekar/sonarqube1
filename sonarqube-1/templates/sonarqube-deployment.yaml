@@ -71,18 +71,18 @@ spec:
             httpGet:
               path: /api/system/health
               port: 9000
-            initialDelaySeconds: 180
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 12
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 6
           readinessProbe:
             httpGet:
               path: /api/system/health
               port: 9000
-            initialDelaySeconds: 180
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 12
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 6
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
