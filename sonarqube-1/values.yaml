@@ -30,7 +30,7 @@ sonarqube:
     SONAR_JVM_OPTS: "-Xmx512m -Xms256m -XX:+ExitOnOutOfMemoryError"
   resources:
     requests:
-      cpu: "250m"
+      cpu: "50m"
       memory: "1Gi"
     limits:
       cpu: "1"
