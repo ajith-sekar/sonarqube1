@@ -55,17 +55,17 @@ sonarqube:
       emptyDir: true
   livenessProbe:
     httpGet:
-      path: /api/system/health  # Updated health check path
+      path: /api/system/health  # Corrected health check path
       port: 9000
-    initialDelaySeconds: 90
+    initialDelaySeconds: 120  # Increased initial delay for readiness and liveness probes
     periodSeconds: 30
     timeoutSeconds: 10
     failureThreshold: 6
   readinessProbe:
     httpGet:
-      path: /api/system/health  # Updated health check path
+      path: /api/system/health  # Corrected health check path
       port: 9000
-    initialDelaySeconds: 90
+    initialDelaySeconds: 120  # Increased initial delay
     periodSeconds: 20
     timeoutSeconds: 10
     failureThreshold: 6
