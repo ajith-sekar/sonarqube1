@@ -73,7 +73,7 @@ spec:
                 - ALL
           livenessProbe:
             httpGet:
-              path: /api/health
+              path: /about
               port: 9000
             initialDelaySeconds: 120
             periodSeconds: 30
@@ -81,7 +81,7 @@ spec:
             failureThreshold: 6
           readinessProbe:
             httpGet:
-              path: /api/health
+              path: /about
               port: 9000
             initialDelaySeconds: 120
             periodSeconds: 30
