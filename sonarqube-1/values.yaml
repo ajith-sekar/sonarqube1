@@ -55,7 +55,7 @@ sonarqube:
       emptyDir: true
   livenessProbe:
     httpGet:
-      path: /api/system/status
+      path: /api/health
       port: 9000
     initialDelaySeconds: 120
     periodSeconds: 30
@@ -63,7 +63,7 @@ sonarqube:
     failureThreshold: 6
   readinessProbe:
     httpGet:
-      path: /api/system/status
+      path: /api/health
       port: 9000
     initialDelaySeconds: 120
     periodSeconds: 20
