@@ -32,8 +32,8 @@ sonarqube:
     SONAR_JDBC_USERNAME: sonar
     SONAR_JDBC_PASSWORD: sonarpass
     SONAR_JVM_OPTS: "-Xmx512m -Xms256m -XX:+ExitOnOutOfMemoryError"
-    SONAR_AUTHENTICATION_ANONYMOUS: "true"  # Allow anonymous access for probes
-    SONAR_WEB_CONTEXT_PATH: "/"            # Ensure health endpoint is available without any path issue
+    SONAR_AUTHENTICATION_ANONYMOUS: "true"
+    SONAR_WEB_CONTEXT_PATH: "/"
   resources:
     requests:
       cpu: "200m"
@@ -55,17 +55,17 @@ sonarqube:
       emptyDir: true
   livenessProbe:
     httpGet:
-      path: /api/system/health  # Corrected health check path
+      path: /api/system/status
       port: 9000
-    initialDelaySeconds: 120  # Increased initial delay for readiness and liveness probes
+    initialDelaySeconds: 120
     periodSeconds: 30
     timeoutSeconds: 10
     failureThreshold: 6
   readinessProbe:
     httpGet:
-      path: /api/system/health  # Corrected health check path
+      path: /api/system/status
       port: 9000
-    initialDelaySeconds: 120  # Increased initial delay
+    initialDelaySeconds: 120
     periodSeconds: 20
     timeoutSeconds: 10
     failureThreshold: 6
