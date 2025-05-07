@@ -50,7 +50,11 @@ spec:
             - name: SONAR_JDBC_PASSWORD
               value: {{ .Values.sonarqube.env.SONAR_JDBC_PASSWORD | quote }}
             - name: SONAR_JVM_OPTS
-              value: "-Xmx512m -Xms256m -XX:+ExitOnOutOfMemoryError"
+              value: {{ .Values.sonarqube.env.SONAR_JVM_OPTS | quote }}
+            - name: SONAR_AUTHENTICATION_ANONYMOUS
+              value: {{ .Values.sonarqube.env.SONAR_AUTHENTICATION_ANONYMOUS | quote }}
+            - name: SONAR_WEB_CONTEXT_PATH
+              value: {{ .Values.sonarqube.env.SONAR_WEB_CONTEXT_PATH | quote }}
           resources:
             requests:
               cpu: {{ .Values.sonarqube.resources.requests.cpu | quote }}
@@ -69,17 +73,17 @@ spec:
                 - ALL
           livenessProbe:
             httpGet:
-              path: /api/system/health
+              path: /api/health
               port: 9000
-            initialDelaySeconds: 90
+            initialDelaySeconds: 120
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 6
           readinessProbe:
             httpGet:
-              path: /api/system/health
+              path: /api/health
               port: 9000
-            initialDelaySeconds: 90
+            initialDelaySeconds: 120
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 6
