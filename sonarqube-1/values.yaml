@@ -16,7 +16,8 @@ postgres:
   auth:
     database: sonarqube
     username: sonar
-    password: sonarpass
+    existingSecret: postgres-secret
+    existingSecretKey: password
   securityContext:
     runAsNonRoot: true
     runAsUser: 999
