@@ -15,6 +15,15 @@ spec:
       labels:
         app: sonarqube
     spec:
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 /opt/sonarqube/data"]
+          volumeMounts:
+            - name: sonarqube-data
+              mountPath: /opt/sonarqube/data
+          securityContext:
+            runAsUser: 0
       automountServiceAccountToken: false
       securityContext:
         fsGroup: {{ .Values.sonarqube.securityContext.fsGroup }}
@@ -50,7 +59,7 @@ spec:
               memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
           livenessProbe:
             httpGet:
-              path: /api/system/health?systemPasscode=healthcheckpass
+              path: /api/health
               port: 9000
             initialDelaySeconds: {{ .Values.sonarqube.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.sonarqube.livenessProbe.periodSeconds }}
@@ -58,7 +67,7 @@ spec:
             failureThreshold: {{ .Values.sonarqube.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /api/system/health?systemPasscode=healthcheckpass
+              path: /api/health
               port: 9000
             initialDelaySeconds: {{ .Values.sonarqube.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.sonarqube.readinessProbe.periodSeconds }}
@@ -71,9 +80,6 @@ spec:
               mountPath: /opt/sonarqube/extensions
             - name: sonarqube-logs
               mountPath: /opt/sonarqube/logs
-            - name: config-volume
-              mountPath: /opt/sonarqube/conf/sonar.properties
-              subPath: sonar.properties
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
@@ -84,6 +90,3 @@ spec:
         - name: sonarqube-logs
           persistentVolumeClaim:
             claimName: {{ .Values.sonarqube.persistence.logs.existingClaim }}
-        - name: config-volume
-          configMap:
-            name: sonarqube-config
