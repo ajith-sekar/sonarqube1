@@ -15,15 +15,6 @@ spec:
       labels:
         app: sonarqube
     spec:
-      initContainers:
-        - name: fix-permissions
-          image: busybox
-          command: ["sh", "-c", "chown -R 1000:1000 /opt/sonarqube/data"]
-          volumeMounts:
-            - name: sonarqube-data
-              mountPath: /opt/sonarqube/data
-          securityContext:
-            runAsUser: 0
       automountServiceAccountToken: false
       securityContext:
         fsGroup: {{ .Values.sonarqube.securityContext.fsGroup }}
@@ -59,7 +50,7 @@ spec:
               memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
           livenessProbe:
             httpGet:
-              path: /api/health
+              path: /
               port: 9000
             initialDelaySeconds: {{ .Values.sonarqube.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.sonarqube.livenessProbe.periodSeconds }}
@@ -67,7 +58,7 @@ spec:
             failureThreshold: {{ .Values.sonarqube.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /api/health
+              path: /
               port: 9000
             initialDelaySeconds: {{ .Values.sonarqube.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.sonarqube.readinessProbe.periodSeconds }}
