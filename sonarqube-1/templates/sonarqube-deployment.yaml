@@ -2,7 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonarqube
-  namespace: sonarqube
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: sonarqube
 spec:
   replicas: 1
   selector:
@@ -15,27 +17,8 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        fsGroup: 1000
-        seccompProfile:
-          type: RuntimeDefault
-      initContainers:
-        - name: fix-permissions
-          image: busybox:1.35
-          command:
-            - sh
-            - -c
-            - |
-              mkdir -p /opt/sonarqube/data/es7 /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp && \
-              chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/extensions /opt/sonarqube/logs /opt/sonarqube/temp
-          volumeMounts:
-            - name: sonarqube-data
-              mountPath: /opt/sonarqube/data
-            - name: sonarqube-extensions
-              mountPath: /opt/sonarqube/extensions
-            - name: sonarqube-logs
-              mountPath: /opt/sonarqube/logs
-            - name: sonarqube-temp
-              mountPath: /opt/sonarqube/temp
+        fsGroup: {{ .Values.sonarqube.securityContext.fsGroup }}
+        runAsUser: {{ .Values.sonarqube.securityContext.runAsUser }}
       containers:
         - name: sonarqube
           image: "{{ .Values.sonarqube.image.repository }}:{{ .Values.sonarqube.image.tag }}"
@@ -48,11 +31,14 @@ spec:
             - name: SONAR_JDBC_USERNAME
               value: {{ .Values.sonarqube.env.SONAR_JDBC_USERNAME | quote }}
             - name: SONAR_JDBC_PASSWORD
-              value: {{ .Values.sonarqube.env.SONAR_JDBC_PASSWORD | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
             - name: SONAR_JVM_OPTS
               value: {{ .Values.sonarqube.env.SONAR_JVM_OPTS | quote }}
             - name: SONAR_AUTHENTICATION_ANONYMOUS
-              value: "true"  # Added the anonymous access environment variable
+              value: {{ .Values.sonarqube.env.SONAR_AUTHENTICATION_ANONYMOUS | quote }}
             - name: SONAR_WEB_CONTEXT_PATH
               value: {{ .Values.sonarqube.env.SONAR_WEB_CONTEXT_PATH | quote }}
           resources:
@@ -62,31 +48,22 @@ spec:
             limits:
               cpu: {{ .Values.sonarqube.resources.limits.cpu | quote }}
               memory: {{ .Values.sonarqube.resources.limits.memory | quote }}
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            runAsNonRoot: true
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
-            capabilities:
-              drop:
-                - ALL
           livenessProbe:
             httpGet:
-              path: /about
+              path: /api/health
               port: 9000
-            initialDelaySeconds: 120
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 6
+            initialDelaySeconds: {{ .Values.sonarqube.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sonarqube.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sonarqube.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.sonarqube.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /about
+              path: /api/health
               port: 9000
-            initialDelaySeconds: 120
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 6
+            initialDelaySeconds: {{ .Values.sonarqube.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sonarqube.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.sonarqube.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.sonarqube.readinessProbe.failureThreshold }}
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
@@ -94,8 +71,6 @@ spec:
               mountPath: /opt/sonarqube/extensions
             - name: sonarqube-logs
               mountPath: /opt/sonarqube/logs
-            - name: sonarqube-temp
-              mountPath: /opt/sonarqube/temp
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
@@ -106,5 +81,3 @@ spec:
         - name: sonarqube-logs
           persistentVolumeClaim:
             claimName: {{ .Values.sonarqube.persistence.logs.existingClaim }}
-        - name: sonarqube-temp
-          emptyDir: {}
