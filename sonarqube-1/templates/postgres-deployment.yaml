@@ -40,15 +40,15 @@ spec:
                 - ALL
       containers:
         - name: postgres
-          image: "postgres:15.2"
-          imagePullPolicy: Always
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
           ports:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: "sonarqube"
+              value: {{ .Values.postgres.auth.database | quote }}
             - name: POSTGRES_USER
-              value: "sonar"
+              value: {{ .Values.postgres.auth.username | quote }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -67,11 +67,11 @@ spec:
                 - ALL
           resources:
             requests:
-              cpu: "500m"
-              memory: "2Gi"
+              cpu: {{ .Values.postgres.resources.requests.cpu | quote }}
+              memory: {{ .Values.postgres.resources.requests.memory | quote }}
             limits:
-              cpu: "1000m"
-              memory: "4Gi"
+              cpu: {{ .Values.postgres.resources.limits.cpu | quote }}
+              memory: {{ .Values.postgres.resources.limits.memory | quote }}
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
@@ -89,3 +89,5 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
+
+
