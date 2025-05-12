@@ -40,20 +40,20 @@ spec:
                 - ALL
       containers:
         - name: postgres
-          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag | default \"15.2\" }}"
-          imagePullPolicy: {{ .Values.postgres.image.pullPolicy | default "Always" }}
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
           ports:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: {{ .Values.postgres.auth.database | default "sonarqube" | quote }}
+              value: {{ .Values.postgres.auth.database | quote }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgres.auth.username | default "sonar" | quote }}
+              value: {{ .Values.postgres.auth.username | quote }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgres.auth.existingSecret | default "postgres-secret" }}
-                  key: {{ .Values.postgres.auth.existingSecretKey | default "password" }}
+                  name: postgres-secret
+                  key: password
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           securityContext:
@@ -67,11 +67,11 @@ spec:
                 - ALL
           resources:
             requests:
-              cpu: {{ .Values.postgres.resources.requests.cpu | default "500m" | quote }}
-              memory: {{ .Values.postgres.resources.requests.memory | default "2Gi" | quote }}
+              cpu: {{ .Values.postgres.resources.requests.cpu | quote }}
+              memory: {{ .Values.postgres.resources.requests.memory | quote }}
             limits:
-              cpu: {{ .Values.postgres.resources.limits.cpu | default "1000m" | quote }}
-              memory: {{ .Values.postgres.resources.limits.memory | default "4Gi" | quote }}
+              cpu: {{ .Values.postgres.resources.limits.cpu | quote }}
+              memory: {{ .Values.postgres.resources.limits.memory | quote }}
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
