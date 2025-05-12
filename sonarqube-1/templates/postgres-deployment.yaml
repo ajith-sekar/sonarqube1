@@ -41,19 +41,19 @@ spec:
       containers:
         - name: postgres
           image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag | default \"15.2\" }}"
-          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy | default "Always" }}
           ports:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: {{ .Values.postgres.auth.database | quote }}
+              value: {{ .Values.postgres.auth.database | default "sonarqube" | quote }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgres.auth.username | quote }}
+              value: {{ .Values.postgres.auth.username | default "sonar" | quote }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
-                  key: password
+                  name: {{ .Values.postgres.auth.existingSecret | default "postgres-secret" }}
+                  key: {{ .Values.postgres.auth.existingSecretKey | default "password" }}
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           securityContext:
@@ -67,11 +67,11 @@ spec:
                 - ALL
           resources:
             requests:
-              cpu: {{ .Values.postgres.resources.requests.cpu | quote }}
-              memory: {{ .Values.postgres.resources.requests.memory | quote }}
+              cpu: {{ .Values.postgres.resources.requests.cpu | default "500m" | quote }}
+              memory: {{ .Values.postgres.resources.requests.memory | default "2Gi" | quote }}
             limits:
-              cpu: {{ .Values.postgres.resources.limits.cpu | quote }}
-              memory: {{ .Values.postgres.resources.limits.memory | quote }}
+              cpu: {{ .Values.postgres.resources.limits.cpu | default "1000m" | quote }}
+              memory: {{ .Values.postgres.resources.limits.memory | default "4Gi" | quote }}
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
