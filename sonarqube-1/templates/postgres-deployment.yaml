@@ -40,7 +40,7 @@ spec:
                 - ALL
       containers:
         - name: postgres
-          image: "image: "postgres:15.2"
+          image: "postgres:15.2"
           imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
           ports:
             - containerPort: 5432
